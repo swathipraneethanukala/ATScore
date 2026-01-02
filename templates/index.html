@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATScore</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #020617; /* Slate 950 */
+            color: #f8fafc;
+        }
+        .dark-glass {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(51, 65, 85, 0.4);
+        }
+        .progress-ring {
+            transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        .mesh-gradient {
+            background-image: radial-gradient(at 0% 0%, rgba(30, 58, 138, 0.3) 0, transparent 50%),
+                              radial-gradient(at 100% 100%, rgba(88, 28, 135, 0.3) 0, transparent 50%);
+        }
+        /* Markdown Styling */
+        .prose h1, .prose h2, .prose h3 { color: #fff; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+        .prose p { margin-bottom: 1rem; color: #cbd5e1; }
+        .prose ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; color: #cbd5e1; }
+        .prose li { margin-bottom: 0.25rem; }
+        .prose strong { color: #60a5fa; font-weight: 600; }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="min-h-screen mesh-gradient selection:bg-blue-500/30">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 dark-glass border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2">
+                    <div class="bg-blue-600 p-1.5 rounded-lg shadow-lg shadow-blue-900/20">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <span class="text-xl font-extrabold tracking-tight text-white italic">ATS<span class="text-blue-500">CORE</span></span>
+                </div>
+                <div class="hidden md:flex space-x-8 text-sm font-semibold text-slate-400">
+                    <span class="text-blue-400">Make Your Resume ATS-Smart</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto px-6 py-16">
+        <!-- Hero Section -->
+        <div class="text-center mb-12">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold mb-6 uppercase tracking-widest">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                </span>
+                Professional Resume Matcher
+            </div>
+            <h1 class="text-5xl md:text-6xl font-black text-white mb-6 tracking-tight leading-tight">
+                Analyze Your <br>
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-500 text-6xl">ATS Match.</span>
+            </h1>
+            <p class="text-slate-400 max-w-2xl mx-auto">Upload your resume and paste the job description to see how well you rank for the position.</p>
+        </div>
+
+        <!-- Input Container -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+            <!-- Resume Upload -->
+            <div class="flex flex-col gap-4">
+                <label class="text-sm font-bold text-slate-400 uppercase tracking-widest px-2">1. Upload Resume (PDF)</label>
+                <div id="drop-zone" class="dark-glass rounded-3xl p-10 text-center transition-all cursor-pointer group relative overflow-hidden border-2 border-dashed border-slate-700 hover:border-blue-500/50 h-full flex flex-col justify-center">
+                    <input type="file" id="file-input" class="hidden" accept=".pdf">
+                    <div class="relative z-10">
+                        <div class="mb-4 flex justify-center">
+                            <div class="w-16 h-16 bg-slate-800 text-blue-400 rounded-2xl flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 shadow-2xl">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-1">Upload PDF</h3>
+                        <p class="text-slate-500 text-sm">Drag and drop or click</p>
+                        <div id="file-name" class="mt-4 text-blue-400 font-bold hidden bg-blue-500/10 py-2 rounded-lg border border-blue-500/20 px-3 truncate text-xs">
+                            <span id="name-text"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Job Description -->
+            <div class="flex flex-col gap-4">
+                <label class="text-sm font-bold text-slate-400 uppercase tracking-widest px-2">2. Paste Job Description</label>
+                <div class="dark-glass rounded-3xl p-6 h-full border border-slate-700">
+                    <textarea 
+                        id="job-desc"
+                        class="w-full h-48 lg:h-full bg-slate-900/50 border border-slate-800 rounded-2xl p-4 text-slate-300 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-none placeholder:text-slate-600"
+                        placeholder="Paste the requirements, responsibilities, and skills from the job posting..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <button 
+                onclick="startAnalysis()"
+                id="analyze-btn"
+                class="w-full max-w-md bg-blue-600 text-white px-8 py-5 rounded-2xl text-lg font-extrabold hover:bg-blue-500 transition shadow-2xl shadow-blue-900/40 flex items-center justify-center gap-3 mx-auto">
+                <span id="btn-text">Check ATS Score</span>
+                <svg id="loading-spinner" class="animate-spin h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Results Dashboard -->
+        <div id="results" class="hidden mt-20 space-y-10 animate-in fade-in slide-in-from-bottom-5 duration-700">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Circular Score -->
+                <div class="lg:col-span-4 dark-glass p-10 rounded-3xl flex flex-col items-center justify-center text-center shadow-inner">
+                    <h3 class="text-slate-400 font-bold uppercase tracking-widest text-xs mb-8">Match Rating</h3>
+                    <div class="relative w-48 h-48">
+                        <svg class="w-full h-full">
+                            <circle class="text-slate-800" stroke-width="12" stroke="currentColor" fill="transparent" r="85" cx="96" cy="96"/>
+                            <circle class="text-blue-500 progress-ring" stroke-width="12" stroke-dasharray="534" stroke-dashoffset="534" stroke-linecap="round" stroke="currentColor" fill="transparent" r="85" cx="96" cy="96" id="score-circle"/>
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span class="text-5xl font-black text-white" id="score-text">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Detailed Analysis -->
+                <div class="lg:col-span-8 dark-glass p-10 rounded-3xl relative">
+                    <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                        <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                        AI Evaluation Report
+                    </h3>
+                    <div id="ai-report" class="prose text-slate-300 text-sm leading-relaxed max-h-[500px] overflow-y-auto pr-4">
+                        Waiting for analysis...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const fileNameDiv = document.getElementById('file-name');
+        const nameText = document.getElementById('name-text');
+        const jobDesc = document.getElementById('job-desc');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                nameText.textContent = e.target.files[0].name;
+                fileNameDiv.classList.remove('hidden');
+            }
+        });
+
+        async function startAnalysis() {
+            if (fileInput.files.length === 0) {
+                alert('Please upload your resume PDF.');
+                return;
+            }
+            if (!jobDesc.value.trim()) {
+                alert('Please provide a job description for matching.');
+                return;
+            }
+
+            const btn = document.getElementById('analyze-btn');
+            const btnText = document.getElementById('btn-text');
+            const spinner = document.getElementById('loading-spinner');
+            const results = document.getElementById('results');
+            const reportDiv = document.getElementById('ai-report');
+
+            // UI Loading State
+            btnText.textContent = 'Comparing Data...';
+            spinner.classList.remove('hidden');
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            // Prepare Data for Backend
+            const formData = new FormData();
+            formData.append('resume', fileInput.files[0]);
+            formData.append('job_description', jobDesc.value);
+
+            try {
+                const response = await fetch('/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('Backend communication failed.');
+
+                const rawMarkdown = await response.text();
+                
+                results.classList.remove('hidden');
+                results.scrollIntoView({ behavior: 'smooth' });
+
+                // Render Markdown cleanly using marked.js
+                reportDiv.innerHTML = marked.parse(rawMarkdown);
+
+                // Match score logic (supports X/100 or "X out of 100")
+                const match = rawMarkdown.match(/(\d+)\/100/) || rawMarkdown.match(/(\d+)\s+out of\s+100/);
+                const score = match ? parseInt(match[1]) : 50;
+
+                animateScore(score);
+
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                btnText.textContent = 'Re-Run Matcher';
+                spinner.classList.add('hidden');
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function animateScore(target) {
+            const scoreCircle = document.getElementById('score-circle');
+            const scoreText = document.getElementById('score-text');
+            const circumference = 85 * 2 * Math.PI;
+
+            let currentScore = 0;
+            const interval = setInterval(() => {
+                if (currentScore >= target) {
+                    clearInterval(interval);
+                    return;
+                }
+                currentScore++;
+                scoreText.textContent = currentScore + '%';
+                // Calculate offset based on a 100-point scale
+                const offset = circumference - (currentScore / 100 * circumference);
+                scoreCircle.style.strokeDashoffset = offset;
+            }, 15);
+        }
+    </script>
+</body>
+</html>
