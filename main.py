@@ -42,7 +42,7 @@ Job Description:
 {job_description}
 
 Tasks:
-1. give Match percentage (out of 100)
+1. give Match percentage (out of 100),represent in the big animated text( with heading MATCH SCORE)
 2. Matching skills
 3. Missing skills
 4. Strengths
